@@ -3,6 +3,7 @@ import axios from 'axios';
 
 import pokerRules from './helpers/pokerRules'
 import './App.css';
+import Card from './Card';
 
 
 class App extends Component {
@@ -17,7 +18,6 @@ class App extends Component {
       deck1: [],
       deck2: [],
       token: null,
-      expirationTime:300000,
     }
   }
 
@@ -143,33 +143,15 @@ class App extends Component {
       return (
         <div>
           <p>{this.state.messageTied}</p>
+          <button className="btn" onClick={this.handleClick}>Click to get winner</button>
           <p>Player 1 {this.state.messagePlayer1}</p>
-          <div className="container-cards">
-            {this.state.deck1.map((card1) => {
-              return (<div className="card">
-                <div className="card-header">{card1.suit}</div>
-                <div className="card-main">
-                  <div className="main-description">{card1.number}</div>
-                </div>
-              </div>)
-            })}
-          </div>
+          <Card deck={this.state.deck1} />
           <p>Player 2 {this.state.messagePlayer2}</p>
-          <div className="container-cards">
-            {this.state.deck2.map((card2) => {
-              return (<div className="card">
-                <div className="card-header">{card2.suit}</div>
-                <div className="card-main">
-                  <div className="main-description">{card2.number}</div>
-                </div>
-              </div>)
-            })}
-          </div>
-          <button onClick={this.handleClick}>Click to get winner</button>
+          <Card deck={this.state.deck2} />
         </div>
       );
-    }
 
+    }
   }
 }
 

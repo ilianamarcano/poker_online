@@ -1,3 +1,13 @@
+
+
+button, html [type=button], [type=reset], [type=submit] {
+  -webkit-appearance: button;
+}
+.btn {
+  background-color: #EF9A9A;
+  height: 40px;
+}
+
 .App {
   text-align: center;
 }
@@ -36,7 +46,11 @@
   flex-direction: column;
 }
 
-.card-header {
+.card.card-black{
+  border: 1px solid #3c3636;
+}
+
+.card-header-red {
   color: #D32F2F;
   text-align: center;
   font-size: 12px;
@@ -44,6 +58,25 @@
   border-bottom: 1px solid #EF9A9A;
   background-color: #FFEBEE;
   padding: 5px 10px;
+}
+
+
+.card-header-black {
+  color: #140D0D;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #140D0D;
+  background-color: #493e40;
+  padding: 5px 10px;
+}
+
+.App-img{
+
+  width: 40px;
+  height: auto;
+  margin: 0;
+  padding: 0;
 }
 
 .card-main {
