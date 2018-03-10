@@ -26,7 +26,12 @@ class App extends Component {
   getApiDeckUrl = () => `https://services.comparaonline.com/dealer/deck/${this.state.token}/deal/5`;
 
   handleClick = () => {
-    this.calculateWinner();
+    this.fetchDecks(this);
+    if(this.state.deck1.length>0 && this.state.deck2.length>0){
+      this.calculateWinner();
+    }else{
+      this.setState({error: 'Oops! Something did wrong by our side :(, please try clicking again'});
+    }
 
   };
 
@@ -61,10 +66,22 @@ class App extends Component {
       return func(deck2)
     });
 
-    if (ranking.indexOf(funcMatched1) < ranking.indexOf(funcMatched2) || getHighestCard(deck1, deck2).player === 1) {
-      this.setState({messagePlayer1: 'YOU WON!!!'});
-    } else if (ranking.indexOf(funcMatched2) < ranking.indexOf(funcMatched1) || getHighestCard(deck1, deck2).player === 2) {
-      this.setState({messagePlayer2: 'YOU WON!!!'});
+    const combinations = {
+      hasOnePair: 'one pair',
+      hasTwoPairs: 'two pairs',
+      hasThreeOfAKind: 'three of a kind',
+      hasStraight: 'straight',
+      hasFlush: 'flush',
+      hasFullHouse: 'full house',
+      hasFourOfAKind: 'four of a kind',
+      hasStraightFlush: 'straight flush',
+      hasRoyalFlush: 'royal flush',
+    }
+
+    if ((funcMatched1 && ranking.indexOf(funcMatched1) < ranking.indexOf(funcMatched2)) || getHighestCard(deck1, deck2).player === 1) {
+      this.setState({messagePlayer1: `YOU WON!!! with ${funcMatched1?combinations[funcMatched1.name]:'highest card'}`});
+    } else if ((funcMatched2 && ranking.indexOf(funcMatched2) < ranking.indexOf(funcMatched1)) || getHighestCard(deck1, deck2).player === 2) {
+      this.setState({messagePlayer2: `YOU WON!!! with ${funcMatched2?combinations[funcMatched2.name]:'highest card'}`});
     } else {
       const deck1Sorted = getSortedValueCards(deck1).reverse();
       const deck2Sorted = getSortedValueCards(deck2).reverse();
@@ -76,11 +93,11 @@ class App extends Component {
         deck2Tmp.shift();
 
         if (getHighestCard(deck1Tmp, deck2Tmp).player === 1) {
-          this.setState({messagePlayer1: 'YOU WON!!!'});
+          this.setState({messagePlayer1: 'YOU WON!!! with highest card'});
           break;
         }
         if (getHighestCard(deck1Tmp, deck2Tmp).player === 2) {
-          this.setState({messagePlayer2: 'YOU WON!!!'});
+          this.setState({messagePlayer2: 'YOU WON!!! with  highest card'});
           break;
         }
       }
@@ -102,11 +119,14 @@ class App extends Component {
       });
     }, this.state.expirationTime);
 
-    //TODO convert this nested promise into promise.all with axios
+    this.fetchDecks(self);
+  }
 
+  //TODO convert this nested promise into promise.all with axios
+  fetchDecks(self) {
     axios.post(self.getApiTokenDealerUrl())
       .then((res) => {
-        this.setState({token:res.data});
+        this.setState({token: res.data});
         axios.get(self.getApiDeckUrl())
           .then((res) => {
             // Set state with result
@@ -129,7 +149,6 @@ class App extends Component {
       }).catch((err) => {
       self.setState({message: 'Oops! Something did wrong by our side :(, please try again'});
     });
-
   }
 
   render() {
