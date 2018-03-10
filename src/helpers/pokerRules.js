@@ -13,31 +13,34 @@ const valueCards = [
   {name: '7', value: 6},
   {name: '8', value: 7},
   {name: '9', value: 8},
-  {name: 'Ten', value: 9},
-  {name: 'Jack', value: 10},
-  {name: 'Queen', value: 11},
-  {name: 'King', value: 12},
-  {name: 'Ace', value: 13}
+  {name: '10', value: 9},
+  {name: 'J', value: 10},
+  {name: 'Q', value: 11},
+  {name: 'K', value: 12},
+  {name: 'A', value: 13}
 ];
+
+const getSortOrder = (card1, card2) =>{
+  const valueCard1 = valueCards.find((valueCard) => {
+    return valueCard.name === card1.number;
+  });
+
+  const valueCard2 = valueCards.find((valueCard) => {
+    return valueCard.name === card2.number;
+  });
+
+  if (valueCard1.value > valueCard2.value) {
+    return 1;
+  }
+  if (valueCard1.value < valueCard2.value) {
+    return -1;
+  }
+  return 0;
+}
 
 const getSortedValueCards = (deck) => {
   return deck.sort((card1, card2) => {
-
-    const valueCard1 = valueCards.find((valueCard) => {
-      return valueCard.name === card1.number;
-    });
-
-    const valueCard2 = valueCards.find((valueCard) => {
-      return valueCard.name === card2.number;
-    });
-
-    if (valueCard1.value > valueCard2.value) {
-      return 1;
-    }
-    if (valueCard1.value < valueCard2.value) {
-      return -1;
-    }
-    return 0;
+    return getSortOrder(card1, card2);
   });
 };
 
@@ -45,26 +48,31 @@ const getSortedValueCards = (deck) => {
  *  1. High Card: Highest value card. Order is 2, 3, 4, 5, 6, 7, 8, 9, Ten, Jack, Queen, King, Ace.
  */
 const getHighestCard = (deck1, deck2) => {
+
   const deck1Sorted = getSortedValueCards(deck1);
   const deck2Sorted = getSortedValueCards(deck2);
 
-  if (Math.max(deck1Sorted) > Math.max(deck2Sorted)) {
-    return deck1Sorted[deck1Sorted.length - 1];
+  const deck1Length = deck1Sorted.length-1;
+  const deck2Length = deck2Sorted.length-1;
+
+  if (getSortOrder(deck1Sorted[deck1Length],deck2Sorted[deck2Length])===1) {
+    return {player: 1, card: deck1Sorted[deck1Sorted.length - 1]};
   }
 
-  if (Math.max(deck1Sorted) !== Math.max(deck2Sorted)) {
-    return deck2Sorted[deck2Sorted.length - 1];
+  if (getSortOrder(deck1Sorted[deck1Length],deck2Sorted[deck2Length])===-1) {
+    return {player: 2, card: deck2Sorted[deck2Sorted.length - 1]};
   }
 
   return 'equals';
 };
 
 const findOnePair = function (deckSorted) {
-  return deckSorted.find((card1) => {
-    deckSorted.find((card2) => {
-      return card1 === card2;
-    });
-  });
+  for (let i = 0; (i < deckSorted.length && typeof deckSorted[i + 1] !== 'undefined'); i++) {
+    if (deckSorted[i].number === deckSorted[i + 1].number) {
+      return deckSorted[i];
+    }
+  }
+  return undefined;
 };
 
 /**
@@ -85,28 +93,29 @@ const hasTwoPairs = (deck) => {
     const duplicated = findOnePair(deck);
     const index = deck.indexOf(duplicated);
 
-    deck.splice(index, 1);
+    const deckTmp = Object.assign([], deck);
 
-    return hasOnePair(deck);
+    deckTmp.splice(index, 1);
+
+    return hasOnePair(deckTmp);
   }
+  return false;
 };
 
 /**
  *  4. Three of a Kind: Three cards of the same value.
  */
 const hasThreeOfAKind = (deck) => {
-  const count = 1;
-  if (hasOnePair(deck)) {
+  if (hasTwoPairs(deck)) {
     const duplicated = findOnePair(deck);
     const index = deck.indexOf(duplicated);
 
-    deck.splice(index, 1);
+    const deckTmp = Object.assign([], deck);
 
-    if (count === 2) {
-      return hasOnePair(deck);
-    }
-    hasThreeOfAKind(deck);
+    deckTmp.splice(index, 1);
+    return hasTwoPairs(deckTmp);
   }
+  return false;
 };
 
 /**
@@ -115,15 +124,9 @@ const hasThreeOfAKind = (deck) => {
 const hasStraight = (deck) => {
   const deckSorted = getSortedValueCards(deck);
   for (let i = 0; (i < deckSorted.length && typeof deckSorted[i + 1] !== 'undefined'); i++) {
-    const valueCard = valueCards.find((valueCard) => {
-      return valueCard.name === deckSorted[i].suit;
-    });
 
-    const valueCardNext = valueCards.find((valueCard) => {
-      return valueCard.name === deckSorted[i + 1].suit;
-    });
 
-    if (valueCard.value !== valueCardNext.value - 1) {
+    if (parseInt(deckSorted[i].number) !== deckSorted[i + 1].number - 1) {
       return false;
     }
   }
@@ -133,18 +136,12 @@ const hasStraight = (deck) => {
 /**
  *   6. Flush: All cards of the same suit.
  */
-const hasFlush = () => {
+const hasFlush = (deck) => {
   const deckSorted = getSortedValueCards(deck);
   for (let i = 0; (i < deckSorted.length && typeof deckSorted[i + 1] !== 'undefined'); i++) {
-    const valueCard = valueCards.find((valueCard) => {
-      return valueCard.name === deckSorted[i].suit;
-    });
 
-    const valueCardNext = valueCards.find((valueCard) => {
-      return valueCard.name === deckSorted[i + 1].suit;
-    });
 
-    if (valueCard.suit !== valueCardNext.suit) {
+    if (deckSorted[i].suit !== deckSorted[i + 1].suit) {
       return false;
     }
   }
@@ -162,18 +159,17 @@ const hasFullHouse = (deck) => {
  *   8. Four of a Kind: Four cards of the same value.
  */
 const hasFourOfAKind = (deck) => {
-  const count = 1;
-  if (hasOnePair(deck)) {
+  if (hasThreeOfAKind(deck)) {
     const duplicated = findOnePair(deck);
     const index = deck.indexOf(duplicated);
 
-    deck.splice(index, 1);
+    const deckTmp = Object.assign([], deck);
 
-    if (count === 3) {
-      return hasOnePair(deck);
-    }
-    hasFourOfAKind(deck);
+    deckTmp.splice(index, 1);
+
+    return hasThreeOfAKind(deckTmp);
   }
+  return false;
 };
 
 /**
@@ -196,8 +192,8 @@ const hasRoyalFlush = (deck) => {
   if (!hasFlush(deck)) {
     return false;
   }
-  return findRoyalValue(deck, 'Ten') && findRoyalValue(deck, 'Jack') && findRoyalValue(deck, 'Queen')
-    && findRoyalValue(deck, 'King') && findRoyalValue(deck, 'Ace');
+  return findRoyalValue(deck, '10') && findRoyalValue(deck, 'J') && findRoyalValue(deck, 'Q')
+    && findRoyalValue(deck, 'K') && findRoyalValue(deck, 'A');
 };
 
 
@@ -212,4 +208,5 @@ export default {
   hasFourOfAKind,
   hasStraightFlush,
   hasRoyalFlush,
+  getSortedValueCards,
 };

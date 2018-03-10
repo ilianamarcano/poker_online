@@ -28,7 +28,7 @@
 }
 
 .card {
-  width: 150px;
+  width: 100px;
   border: 1px solid #EF9A9A;
   border-radius: 4px;
   overflow: hidden;
@@ -51,13 +51,17 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 15px 0;
+  padding: 50px 0;
 }
 
 .main-description {
   color: #D32F2F;
   font-size: 12px;
   text-align: center;
+}
+
+.container-cards{
+  display: flex;
 }
 
 @keyframes App-logo-spin {
